@@ -83,30 +83,8 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 /* 15 Points */
 int instruction_decode(unsigned op,struct_controls *controls)
 {
-    if (op == 0)
-    {
-
-    } 
-    else if (op == 0x2B)
-    {
-      
-    }
-    else if (op == 0x4)
-    {
-
-    }
-    else if (op == 0x23)
-    {
-
-    }
-    else if (op == 0x2)
-    {
-
-    }
-
-
+   
 }
-
 /* Read Register */
 /* 5 Points */
 void read_register(unsigned r1,unsigned r2,unsigned *Reg,unsigned *data1,unsigned *data2)
@@ -133,7 +111,29 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
 /* 10 Points */
 int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsigned *memdata,unsigned *Mem)
 {
-
+    if (MemRead)
+    {
+        if (ALUresult % 4 == 0)
+        {
+            *memdata = Mem[ALUresult >> 2];
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    if (MemWrite)
+    {
+        if (ALUresult % 4 == 0)
+        {
+            Mem[ALUresult >> 2] = data2;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 
@@ -141,13 +141,47 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
 /* 10 Points */
 void write_register(unsigned r2,unsigned r3,unsigned memdata,unsigned ALUresult,char RegWrite,char RegDst,char MemtoReg,unsigned *Reg)
 {
-
+    if (RegWrite)
+    {
+        if (MemtoReg)
+        {
+            if (RegDst)
+            {
+                Reg[r3] = memdata;
+            }
+            else
+            {
+                Reg[r2] = memdata;
+            }
+        }
+        else
+        {
+            if (RegDst)
+            {
+                Reg[r3] = ALUresult;
+            }
+            else
+            {
+                Reg[r2] = ALUresult;
+            }
+        }
+    }
 }
 
 /* PC update */
 /* 10 Points */
 void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char Zero,unsigned *PC)
 {
-
+    *PC += 4;
+    if (Branch && Zero)
+    {
+        *PC += extended_value * 4;
+    }
+    else if (Jump)
+    {
+        int temp = *PC & 0xF0000000;
+        *PC = jsec * 4;
+        *PC = jsec | temp;
+    }
 }
 
